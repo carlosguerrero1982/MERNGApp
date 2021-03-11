@@ -51,6 +51,10 @@ Mutation:{
         });
   
         const post = await newPost.save();
+
+        context.pubsub.publish('NEW POST',{
+            newPost:post
+        })
   
         return post;
    
@@ -76,8 +80,43 @@ Mutation:{
 
         }
 
+    },
+
+    likePost:async(_,{postId},context)=>{
+
+        const {username} = checkauth(context);
+
+        const post = await Post.findById(postId)
+
+        if(post){
+            if(post.likes.find(l=>l.username===username)){
+                post.likes= post.likes.filter(like=>like.username!==username)
+                
+            }else{
+                post.likes.push({
+                    username,
+                    createdAt:new Date().toISOString
+                })
+            }
+
+            await post.save();
+                return post
+        }else{
+            throw new Error('Post not exist')
+        }
+
+
     }
- }
+
+    
+ },
+
+ Subcription:{
+    newPost:{
+        subscribe:(_,__,{pubsub})=> pubsub.asyncIterator('NEW POST')
+        
+    }
+}
 
 }
 

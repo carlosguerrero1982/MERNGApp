@@ -6,16 +6,16 @@ import Post from './models/Post.js'
 import {typeDefs} from './graphql/typeDefs.js'
 import resolvers from './graphql/resolvers/index.js'
 
-const {ApolloServer} = pkg;
+const {ApolloServer,PubSub} = pkg;
 
 
-
+const pubsub = new PubSub()
 
 const server = new ApolloServer({
 
     typeDefs,
     resolvers,
-    context:({req,res})=>({req,res})
+    context:({req,res})=>({req,res,pubsub})
 
 });
 
